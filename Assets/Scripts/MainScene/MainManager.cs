@@ -6,22 +6,32 @@ using UnityEngine.UI;
 
 public class MainManager : MonoBehaviour
 {
+    
     public Brick BrickPrefab;
     public int LineCount = 6;
     public Rigidbody Ball;
-
-    public Text ScoreText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
-    private int m_Points;
     
     private bool m_GameOver = false;
+
+
+    [SerializeField] ScoreText scoreText;
+    private int m_score;
+    [SerializeField] HighScoreText highScoreText;
+    private int m_highScore;
+    [SerializeField] PlayerNameText playerNameText;
+    private string m_playerNameHS;
+   
 
     
     // Start is called before the first frame update
     void Start()
     {
+        InitializeScoreHighScore();
+      
+        
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -64,13 +74,34 @@ public class MainManager : MonoBehaviour
 
     void AddPoint(int point)
     {
-        m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
+        m_score += point;
+        scoreText.SetText($"Score {m_score}");
     }
 
     public void GameOver()
     {
+        if(m_score > m_highScore)
+        {
+            if(DataPersistence.Instance != null)
+            {
+                DataPersistence.Instance.HighScoreLoad(m_score);
+                DataPersistence.Instance.PlayerNameHSLoad(DataPersistence.Instance.GetPlayerName());
+                DataPersistence.Instance.SaveHighScore();
+            }
+
+        }
         m_GameOver = true;
         GameOverText.SetActive(true);
+    }
+
+    void InitializeScoreHighScore()
+    {
+        m_score = 0;
+        scoreText.SetText($"Score {m_score}");
+
+        m_playerNameHS = (DataPersistence.Instance != null)? DataPersistence.Instance.GetPlayerNameHS():"H ";
+        playerNameText.SetText($"Highscore: {m_playerNameHS}");
+        m_highScore = (DataPersistence.Instance != null)? DataPersistence.Instance.GetHighScore(): 0 ;
+        highScoreText.SetText($"{m_highScore}");
     }
 }
